@@ -45,25 +45,24 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install tcl-tk  # Install Tcl/Tk via Chocolatey
-          setx TCL_INCLUDE_DIR "C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
-          setx TCL_LIB_DIR "C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
-          setx TCL_LIBRARY "C:\Program Files\Tcl\lib"
-          setx TK_LIBRARY "C:\Program Files\Tcl\lib"
-          setx PATH "%PATH%;C:\Program Files\Tcl\bin"
+          set TCL_INCLUDE_DIR="C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
+          set TCL_LIB_DIR="C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
+          set TCL_LIBRARY="C:\Program Files\Tcl\lib"
+          set TK_LIBRARY="C:\Program Files\Tcl\lib"
+          set PATH="%PATH%;C:\Program Files\Tcl\bin"
+          set INCLUDE="%INCLUDE%;%TCL_INCLUDE_DIR%"
+          set LIB="%LIB%;%TCL_LIB_DIR%"
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Build wheel
         run: |
-          if [ "${{ matrix.os }}" = 'windows-latest' ]; then
-            export INCLUDE="${INCLUDE};C:/Program Files/Tcl/include"
-            export LIB="${LIB};C:/Program Files/Tcl/lib"
-          else
-            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
-            export LIB="${LIB}:${TCL_LIB_DIR}"
-          fi
           python setup.py bdist_wheel  # Build the wheel
         shell: bash  # Use bash shell for this step
         env:
+          TCL_INCLUDE_DIR: "C:/Program Files/Tcl/include"
+          TCL_LIB_DIR: "C:/Program Files/Tcl/lib"
+          INCLUDE: "${{ env.INCLUDE }};${{ env.TCL_INCLUDE_DIR }}"
+          LIB: "${{ env.LIB }};${{ env.TCL_LIB_DIR }}"
           pythonLocation: /opt/hostedtoolcache/Python/3.12.7/x64
           PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib/pkgconfig
           Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
