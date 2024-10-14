@@ -1,0 +1,59 @@
+name: Build and Save Wheels
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Build Wheels for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Install Tcl/Tk and build dependencies for Linux and macOS
+      - name: Install dependencies for Linux/Mac
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y tk-dev tcl-dev || true
+          python -m pip install --upgrade pip setuptools wheel
+
+      # Install Tcl/Tk and build dependencies for Windows
+      - name: Install dependencies for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install tcl-tk
+          python -m pip install --upgrade pip setuptools wheel
+
+      # Compile the C extension for the appropriate OS
+      - name: Build wheel
+        run: |
+          python setup.py bdist_wheel
+
+      # Copy the wheel files to a directory within the repo (e.g., `wheels/`)
+      - name: Copy wheels to output directory
+        run: |
+          mkdir -p wheels/${{ matrix.os }}-py${{ matrix.python-version }}
+          cp dist/*.whl wheels/${{ matrix.os }}-py${{ matrix.python-version }}/
+
+      # Commit and push the wheel files back to the repository
+      - name: Commit wheels to repo
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add wheels/
+          git commit -m "Add wheels for ${{ matrix.os }} and Python ${{ matrix.python-version }}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use GitHub's token to push changes
