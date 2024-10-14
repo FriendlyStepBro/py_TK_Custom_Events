@@ -8,12 +8,10 @@ if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
     # Use environment variables to get the Tcl/Tk include and lib directories
     include_dirs = [
-        os.environ.get('TCL_INCLUDE_DIR', 'C:/Program Files/Tcl/include'),
-        os.environ.get('TCL_INCLUDE_DIR', '')  # Fallback if not set
+        os.environ.get('TCL_INCLUDE_DIR', 'C:/Program Files/Tcl/include')
     ]
     library_dirs = [
-        os.environ.get('TCL_LIB_DIR', 'C:/Program Files/Tcl/lib'),
-        os.environ.get('TCL_LIB_DIR', '')  # Fallback if not set
+        os.environ.get('TCL_LIB_DIR', 'C:/Program Files/Tcl/lib')
     ]
     libraries = ['tk', 'tcl']
 elif platform.system() == 'Darwin':  # macOS
