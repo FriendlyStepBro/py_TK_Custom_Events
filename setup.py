@@ -5,9 +5,10 @@ import os
 # Detect the platform
 if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
-    include_dirs = [os.environ.get('TCL_LIBRARY', ''), os.environ.get('TK_LIBRARY', '')]  # Set Tcl/Tk paths
+    # Use environment variables to get the Tcl/Tk include and lib directories
+    include_dirs = [os.environ.get('TCL_INCLUDE_DIR', ''), os.environ.get('TK_INCLUDE_DIR', '')]
+    library_dirs = [os.environ.get('TCL_LIB_DIR', ''), os.environ.get('TK_LIB_DIR', '')]
     libraries = ['tk', 'tcl']
-    library_dirs = [os.environ.get('TCL_LIBRARY', ''), os.environ.get('TK_LIBRARY', '')]  # Add Tcl/Tk library directories
 elif platform.system() == 'Darwin':  # macOS
     source_file = 'unix_Resize.c'
     # Include both Tk and X11 headers on macOS
