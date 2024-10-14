@@ -45,13 +45,18 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install tcl-tk  # Install Tcl/Tk via Chocolatey
-          setx TCL_INCLUDE_DIR "C:\Program Files\Tcl\include"
-          setx TCL_LIB_DIR "C:\Program Files\Tcl\lib"
+          set TCL_INCLUDE_DIR="C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
+          set TCL_LIB_DIR="C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
+          setx TCL_LIBRARY "C:\Program Files\Tcl\lib"
+          setx TK_LIBRARY "C:\Program Files\Tcl\lib"
           setx PATH "%PATH%;C:\Program Files\Tcl\bin"
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Build wheel
-        run: python setup.py bdist_wheel
+        run: |
+          set INCLUDE=%INCLUDE%;%TCL_INCLUDE_DIR%
+          set LIB=%LIB%;%TCL_LIB_DIR%
+          python setup.py bdist_wheel
 
       - name: Force recreate and push built wheel to build branch
         run: |
