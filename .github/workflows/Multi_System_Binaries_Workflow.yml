@@ -41,34 +41,25 @@ jobs:
           fi
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install Tcl/Tk and Set Paths for Windows
+      - name: Install MSYS2 and Tcl/Tk for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          choco install tcl-tk  # Install Tcl/Tk via Chocolatey
-          set TCL_INCLUDE_DIR="C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
-          set TCL_LIB_DIR="C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
-          set TCL_LIBRARY="C:\Program Files\Tcl\lib"
-          set TK_LIBRARY="C:\Program Files\Tcl\lib"
-          set PATH="%PATH%;C:\Program Files\Tcl\bin"
-          set INCLUDE="%INCLUDE%;%TCL_INCLUDE_DIR%"
-          set LIB="%LIB%;%TCL_LIB_DIR%"
+          # Install MSYS2
+          choco install msys2
+          
+          # Update MSYS2 and install Tcl/Tk
+          C:\tools\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm"
+          C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
+
+          # Add MSYS2 paths for compilation
+          echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_PATH
+          
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Build wheel
         run: |
           python setup.py bdist_wheel  # Build the wheel
         shell: bash  # Use bash shell for this step
-        env:
-          TCL_INCLUDE_DIR: "C:/Program Files/Tcl/include"
-          TCL_LIB_DIR: "C:/Program Files/Tcl/lib"
-          INCLUDE: "${{ env.INCLUDE }};${{ env.TCL_INCLUDE_DIR }}"
-          LIB: "${{ env.LIB }};${{ env.TCL_LIB_DIR }}"
-          pythonLocation: /opt/hostedtoolcache/Python/3.12.7/x64
-          PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib/pkgconfig
-          Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
-          Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
-          Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
-          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib
 
       - name: Force recreate and push built wheel to build branch
         run: |
