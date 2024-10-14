@@ -52,17 +52,17 @@ jobs:
           setx PATH "%PATH%;C:\Program Files\Tcl\bin"
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Build wheel
+            - name: Build wheel
         run: |
           if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            set INCLUDE=%INCLUDE%;%TCL_INCLUDE_DIR%
-            set LIB=%LIB%;%TCL_LIB_DIR%
+            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
+            export LIB="${LIB}:${TCL_LIB_DIR}"
           else
-            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"  # Use export for Unix-based shells
+            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"  # For Unix-based shells
             export LIB="${LIB}:${TCL_LIB_DIR}"
           fi
           python setup.py bdist_wheel  # Build the wheel
-        shell: bash  # Ensure bash is used for Unix-based shells
+        shell: bash  # Use bash shell for this step
         env:
           pythonLocation: /opt/hostedtoolcache/Python/3.12.7/x64
           PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib/pkgconfig
