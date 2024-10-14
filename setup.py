@@ -8,18 +8,19 @@ if platform.system() == 'Windows':
     libraries = ['tk', 'tcl']
 elif platform.system() == 'Darwin':  # macOS
     source_file = 'unix_Resize.c'
-    include_dirs = ['/Library/Frameworks/Tk.framework/Headers']
-    libraries = ['tcl', 'tk']
+    # Include both Tk and X11 headers on macOS
+    include_dirs = ['/Library/Frameworks/Tk.framework/Headers', '/opt/X11/include']
+    libraries = ['tcl', 'tk', 'X11']
 else:  # Linux and others
     source_file = 'unix_Resize.c'
-    include_dirs = ['/usr/include/tcl', '/usr/include/tk']
-    libraries = ['tcl', 'tk']
+    include_dirs = ['/usr/include/tcl', '/usr/include/tk', '/usr/include/X11']
+    libraries = ['tcl', 'tk', 'X11']
 
 module = Extension(
     'resize_event',
     sources=[source_file],
-    include_dirs=include_dirs,  # Add include directories for Tk framework on macOS
-    libraries=libraries         # Link with Tcl/Tk libraries
+    include_dirs=include_dirs,  # Add include directories for Tk and X11
+    libraries=libraries         # Link with Tcl/Tk and X11 libraries
 )
 
 setup(

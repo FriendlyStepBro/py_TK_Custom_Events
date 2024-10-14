@@ -34,7 +34,9 @@ jobs:
         run: |
           if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             sudo apt-get update
-            sudo apt-get install -y tk-dev tcl-dev
+            sudo apt-get install -y tk-dev tcl-dev libx11-dev
+          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            brew install xquartz  # Install XQuartz to get X11 libraries
           fi
           python -m pip install --upgrade pip setuptools wheel
 
