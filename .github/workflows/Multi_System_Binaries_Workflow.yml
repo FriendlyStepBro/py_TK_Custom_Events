@@ -54,12 +54,16 @@ jobs:
 
       - name: Build wheel
         run: |
-          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            export INCLUDE="${INCLUDE};C:/Program Files/Tcl/include"
-            export LIB="${LIB};C:/Program Files/Tcl/lib"
+          if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
+            INCLUDE="${INCLUDE};C:/Program Files/Tcl/include"
+            LIB="${LIB};C:/Program Files/Tcl/lib"
+            export INCLUDE
+            export LIB
           else
-            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"  # For Unix-based shells
-            export LIB="${LIB}:${TCL_LIB_DIR}"
+            INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
+            LIB="${LIB}:${TCL_LIB_DIR}"
+            export INCLUDE
+            export LIB
           fi
           python setup.py bdist_wheel  # Build the wheel
         shell: bash  # Use bash shell for this step
