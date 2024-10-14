@@ -1,49 +1,47 @@
-#include <Python.h>
 #include <tk.h>
-#include <stdio.h>
+#include <Python.h>
 
-// Callback function for window resize event
-static void ResizeCallback(ClientData clientData, XEvent *eventPtr) {
-    if (eventPtr->type == ConfigureNotify) {
-        Tk_Window tkwin = (Tk_Window)clientData;
-
-        int new_width = Tk_Width(tkwin);
-        int new_height = Tk_Height(tkwin);
-
-        printf("Window resized: new width = %d, new height = %d\n", new_width, new_height);
-    }
-}
-
-// Bind the custom resize event to a Tkinter window (Windows version)
+/* Function to bind the resize event */
 static PyObject* bind_resize_event(PyObject* self, PyObject* args) {
     Tk_Window tkwin;
-    Tk_Window window;
-
-    if (!PyArg_ParseTuple(args, "O&", Tk_Window, &window)) {
+    const char *window_name;
+    Tcl_Interp *interp;
+    
+    if (!PyArg_ParseTuple(args, "s", &window_name)) {
         return NULL;
     }
 
-    Tk_CreateEventHandler(window, StructureNotifyMask, ResizeCallback, (ClientData)window);
+    /* Retrieve the Tcl interpreter (assuming it's been initialized) */
+    interp = Tk_MainWindow(interp);  // Ensure you have access to the correct interpreter
 
+    /* Convert the window name to a Tk_Window */
+    tkwin = Tk_NameToWindow(interp, window_name, Tk_MainWindow(interp));
+    if (tkwin == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to convert window name to Tk_Window.");
+        return NULL;
+    }
+
+    /* Now, you can work with the tkwin as a valid Tk_Window */
+    
     Py_RETURN_NONE;
 }
 
-// Python method definitions
+/* Method definition */
 static PyMethodDef ResizeMethods[] = {
-    {"bind_resize_event", bind_resize_event, METH_VARARGS, "Bind the custom <Resize> event"},
+    {"bind_resize_event", bind_resize_event, METH_VARARGS, "Bind a resize event"},
     {NULL, NULL, 0, NULL}
 };
 
-// Python module definition for Windows
-static struct PyModuleDef resizemodule = {
+/* Module definition */
+static struct PyModuleDef resize_eventmodule = {
     PyModuleDef_HEAD_INIT,
     "resize_event",
-    "C extension for Tkinter to handle custom resize events",
+    NULL,
     -1,
     ResizeMethods
 };
 
-// Initialize module for Windows
+/* Module initialization function */
 PyMODINIT_FUNC PyInit_resize_event(void) {
-    return PyModule_Create(&resizemodule);
+    return PyModule_Create(&resize_eventmodule);
 }
