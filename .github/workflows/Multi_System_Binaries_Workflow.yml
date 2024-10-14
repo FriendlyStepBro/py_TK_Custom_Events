@@ -55,8 +55,8 @@ jobs:
       - name: Build wheel
         run: |
           if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
-            export LIB="${LIB}:${TCL_LIB_DIR}"
+            export INCLUDE="${INCLUDE};C:/Program Files/Tcl/include"
+            export LIB="${LIB};C:/Program Files/Tcl/lib"
           else
             export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"  # For Unix-based shells
             export LIB="${LIB}:${TCL_LIB_DIR}"
