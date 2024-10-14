@@ -54,9 +54,22 @@ jobs:
 
       - name: Build wheel
         run: |
-          set INCLUDE=%INCLUDE%;%TCL_INCLUDE_DIR%
-          set LIB=%LIB%;%TCL_LIB_DIR%
-          python setup.py bdist_wheel
+          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
+            set INCLUDE=%INCLUDE%;%TCL_INCLUDE_DIR%
+            set LIB=%LIB%;%TCL_LIB_DIR%
+          else
+            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"  # Use export for Unix-based shells
+            export LIB="${LIB}:${TCL_LIB_DIR}"
+          fi
+          python setup.py bdist_wheel  # Build the wheel
+        shell: bash  # Ensure bash is used for Unix-based shells
+        env:
+          pythonLocation: /opt/hostedtoolcache/Python/3.12.7/x64
+          PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib/pkgconfig
+          Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
+          Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
+          Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.7/x64
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.7/x64/lib
 
       - name: Force recreate and push built wheel to build branch
         run: |
