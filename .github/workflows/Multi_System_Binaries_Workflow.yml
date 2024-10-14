@@ -49,6 +49,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          git checkout -b build-artifacts  # Create and switch to the branch
           git add dist/*                  # Assuming the wheels are stored in the 'dist/' directory
           git commit -m "Add built wheels for ${{ matrix.python-version }} on ${{ matrix.os }} (${{ matrix.architecture }})"
           git push origin build-artifacts  # Push to a specific branch, or use 'main' if desired
