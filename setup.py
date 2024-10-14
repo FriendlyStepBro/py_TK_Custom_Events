@@ -5,20 +5,21 @@ from setuptools import setup, Extension
 if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
     include_dirs = []  # Windows doesn't need special include paths for Tk
-else:
+    libraries = ['tk', 'tcl']
+elif platform.system() == 'Darwin':  # macOS
     source_file = 'unix_Resize.c'
-    if platform.system() == 'Darwin':  # macOS
-        include_dirs = ['/opt/X11/include', '/usr/include/tcl', '/usr/include/tk']
-        libraries = ['tk', 'tcl', 'X11']
-    else:
-        include_dirs = ['/usr/include/tcl', '/usr/include/tk']
-        libraries = ['tk', 'tcl']
+    include_dirs = ['/Library/Frameworks/Tk.framework/Headers']
+    libraries = ['tcl', 'tk']
+else:  # Linux and others
+    source_file = 'unix_Resize.c'
+    include_dirs = ['/usr/include/tcl', '/usr/include/tk']
+    libraries = ['tcl', 'tk']
 
 module = Extension(
     'resize_event',
     sources=[source_file],
-    include_dirs=include_dirs,  # Add include directories for Tk and X11
-    libraries=libraries  # Link with the X11 library on macOS
+    include_dirs=include_dirs,  # Add include directories for Tk framework on macOS
+    libraries=libraries         # Link with Tcl/Tk libraries
 )
 
 setup(
