@@ -2,6 +2,7 @@ import platform
 from setuptools import setup, Extension
 import os
 
+# This script builds the resize_event module, which is a C extension for tkinter events.
 # Detect the platform
 if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
