@@ -41,14 +41,13 @@ jobs:
           fi
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install Tcl/Tk dependencies for Windows
+      - name: Install Tcl/Tk and Set Paths for Windows
         if: matrix.os == 'windows-latest'
         run: |
           choco install tcl-tk  # Install Tcl/Tk via Chocolatey
-          set TCL_INCLUDE_DIR="C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
-          set TCL_LIB_DIR="C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
-          setx TCL_LIBRARY "%TCL_LIB_DIR%"
-          setx TK_LIBRARY "%TCL_LIB_DIR%"
+          setx TCL_INCLUDE_DIR "C:\Program Files\Tcl\include"
+          setx TCL_LIB_DIR "C:\Program Files\Tcl\lib"
+          setx PATH "%PATH%;C:\Program Files\Tcl\bin"
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Build wheel

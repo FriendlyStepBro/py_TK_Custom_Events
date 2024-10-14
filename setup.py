@@ -6,8 +6,8 @@ import os
 if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
     # Use environment variables to get the Tcl/Tk include and lib directories
-    include_dirs = [os.environ.get('TCL_INCLUDE_DIR', ''), os.environ.get('TK_INCLUDE_DIR', '')]
-    library_dirs = [os.environ.get('TCL_LIB_DIR', ''), os.environ.get('TK_LIB_DIR', '')]
+    include_dirs = [os.environ.get('TCL_INCLUDE_DIR', '')]
+    library_dirs = [os.environ.get('TCL_LIB_DIR', '')]
     libraries = ['tk', 'tcl']
 elif platform.system() == 'Darwin':  # macOS
     source_file = 'unix_Resize.c'
