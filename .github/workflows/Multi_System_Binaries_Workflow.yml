@@ -37,6 +37,7 @@ jobs:
             sudo apt-get install -y tk-dev tcl-dev libx11-dev
           elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
             brew install xquartz  # Install XQuartz to get X11 libraries
+            export LIBRARY_PATH="/opt/X11/lib"  # Ensure X11 libraries are correctly linked
           fi
           python -m pip install --upgrade pip setuptools wheel
 
