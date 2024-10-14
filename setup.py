@@ -1,12 +1,13 @@
 import platform
 from setuptools import setup, Extension
+import os
 
 # Detect the platform
 if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
-    include_dirs = []  # Windows doesn't need special include paths for Tk
+    include_dirs = [os.environ.get('TCL_LIBRARY', ''), os.environ.get('TK_LIBRARY', '')]  # Set Tcl/Tk paths
     libraries = ['tk', 'tcl']
-    library_dirs = []  # No additional library directories for Windows
+    library_dirs = [os.environ.get('TCL_LIBRARY', ''), os.environ.get('TK_LIBRARY', '')]  # Add Tcl/Tk library directories
 elif platform.system() == 'Darwin':  # macOS
     source_file = 'unix_Resize.c'
     # Include both Tk and X11 headers on macOS
@@ -24,7 +25,7 @@ module = Extension(
     sources=[source_file],
     include_dirs=include_dirs,  # Add include directories for Tk and X11
     libraries=libraries,        # Link with Tcl/Tk and X11 libraries
-    library_dirs=library_dirs   # Add library directories (especially for macOS)
+    library_dirs=library_dirs   # Add library directories
 )
 
 setup(
