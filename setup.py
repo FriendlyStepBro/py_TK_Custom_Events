@@ -7,13 +7,18 @@ if platform.system() == 'Windows':
     include_dirs = []  # Windows doesn't need special include paths for Tk
 else:
     source_file = 'unix_Resize.c'
-    include_dirs = ['/usr/include/tcl', '/usr/include/tk']  # Add correct include paths for Tk
+    if platform.system() == 'Darwin':  # macOS
+        include_dirs = ['/opt/X11/include', '/usr/include/tcl', '/usr/include/tk']
+        libraries = ['tk', 'tcl', 'X11']
+    else:
+        include_dirs = ['/usr/include/tcl', '/usr/include/tk']
+        libraries = ['tk', 'tcl']
 
 module = Extension(
     'resize_event',
     sources=[source_file],
-    include_dirs=include_dirs,  # Add include directories for Tk
-    libraries=['tk', 'tcl']
+    include_dirs=include_dirs,  # Add include directories for Tk and X11
+    libraries=libraries  # Link with the X11 library on macOS
 )
 
 setup(
