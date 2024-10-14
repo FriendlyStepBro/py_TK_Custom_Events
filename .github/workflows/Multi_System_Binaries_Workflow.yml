@@ -48,29 +48,21 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          
           rm -rf dist/*  # Discard untracked files in the 'dist/' directory
-          git checkout -b build-artifacts || git checkout build-artifacts  # Create or switch to branch
-          git pull origin build-artifacts --rebase || git rebase --abort  # Rebase or abort if there are conflicts
           
-          # Automatically resolve merge conflicts by using "ours" (current branch)
-          git merge -X theirs master || git merge --abort
+          # Ensure we are on the master branch and up to date
+          git checkout master  # Switch to the master branch
+          git pull origin master --rebase  # Pull the latest changes from the master branch
+
+          # Rebuild the wheel file
+          python setup.py bdist_wheel  # Generate the wheel files
           
-          python setup.py bdist_wheel  # Rebuild the wheel files
+          # Add the new wheel files to Git
           git add dist/*
-          git commit -m "Add built wheels for 3.12 on ubuntu-latest (x64)"
-          git pull origin build-artifacts  # Pull remote changes from build-artifacts before pushing
-          git push origin build-artifacts  # Push to the build-artifacts branch
+          git commit -m "Add built wheels for ${{ matrix.python-version }} on ${{ matrix.os }} (x64)"
           
-          # Merge build-artifacts into master
-          git checkout master  # Switch to master branch (or 'main' if that's your main branch)
-          git pull origin master  # Ensure master branch is up to date
-          git merge --no-ff build-artifacts  # Merge build-artifacts into master
-          
-          # Push the merged changes to master
+          # Push the changes to the master branch
           git push origin master
-          
-          # Delete the build-artifacts branch locally and remotely
-          git branch -d build-artifacts  # Delete the local build-artifacts branch
-          git push origin --delete build-artifacts  # Delete the remote build-artifacts branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
