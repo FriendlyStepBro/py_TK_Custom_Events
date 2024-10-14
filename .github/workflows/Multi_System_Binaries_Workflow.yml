@@ -50,7 +50,11 @@ jobs:
           git config --global user.email "actions@github.com"
           rm -rf dist/*  # Discard untracked files in the 'dist/' directory
           git checkout -b build-artifacts || git checkout build-artifacts  # Create or switch to branch
-          git pull origin build-artifacts --rebase  # Pull the latest changes from the remote branch
+          git pull origin build-artifacts --rebase || git rebase --abort  # Rebase or abort if there are conflicts
+
+          # Automatically resolve merge conflicts by using "ours" (current branch)
+          git merge -X theirs master || git merge --abort
+
           python setup.py bdist_wheel  # Rebuild the wheel files
           git add dist/*
           git commit -m "Add built wheels for ${{ matrix.python-version }} on ${{ matrix.os }} (x64)"
