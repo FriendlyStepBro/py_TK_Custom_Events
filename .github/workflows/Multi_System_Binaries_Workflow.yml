@@ -10,8 +10,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13.0-rc.1']
-        architecture: [x86, x64]
+        python-version: ['3.12']
+        architecture: x64
+        check-latest: true
 
     steps:
       - name: Check out the code
@@ -22,6 +23,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
+        retry:
+        max-attempts: 3
 
       # Install Tcl/Tk and build dependencies for Linux and macOS
       - name: Install dependencies for Linux/Mac
