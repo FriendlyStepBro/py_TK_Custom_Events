@@ -45,8 +45,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install tcl-tk  # Install Tcl/Tk via Chocolatey
-          set TCL_INCLUDE_DIR="C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
-          set TCL_LIB_DIR="C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
+          setx TCL_INCLUDE_DIR "C:\Program Files\Tcl\include"  # Path to Tcl/Tk headers
+          setx TCL_LIB_DIR "C:\Program Files\Tcl\lib"  # Path to Tcl/Tk libraries
           setx TCL_LIBRARY "C:\Program Files\Tcl\lib"
           setx TK_LIBRARY "C:\Program Files\Tcl\lib"
           setx PATH "%PATH%;C:\Program Files\Tcl\bin"
@@ -54,16 +54,12 @@ jobs:
 
       - name: Build wheel
         run: |
-          if [[ "${{ matrix.os }}" == 'windows-latest' ]]; then
-            INCLUDE="${INCLUDE};C:/Program Files/Tcl/include"
-            LIB="${LIB};C:/Program Files/Tcl/lib"
-            export INCLUDE
-            export LIB
+          if [ "${{ matrix.os }}" = 'windows-latest' ]; then
+            export INCLUDE="${INCLUDE};C:/Program Files/Tcl/include"
+            export LIB="${LIB};C:/Program Files/Tcl/lib"
           else
-            INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
-            LIB="${LIB}:${TCL_LIB_DIR}"
-            export INCLUDE
-            export LIB
+            export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
+            export LIB="${LIB}:${TCL_LIB_DIR}"
           fi
           python setup.py bdist_wheel  # Build the wheel
         shell: bash  # Use bash shell for this step
