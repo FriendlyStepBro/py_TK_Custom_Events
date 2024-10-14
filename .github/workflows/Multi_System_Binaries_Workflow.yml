@@ -52,7 +52,7 @@ jobs:
           setx PATH "%PATH%;C:\Program Files\Tcl\bin"
           python -m pip install --upgrade pip setuptools wheel
 
-            - name: Build wheel
+      - name: Build wheel
         run: |
           if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
             export INCLUDE="${INCLUDE}:${TCL_INCLUDE_DIR}"
