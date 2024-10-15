@@ -100,7 +100,18 @@ jobs:
           git add dist/*
           git commit -m "Add built wheels for 3.12 on ${{ matrix.os }} (x64)"
           
-          # Force push to discard and recreate the build branch
+          # Push the build branch
           git push --force origin build  # Force push to overwrite the existing build branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge build branch into master
+        run: |
+          git fetch origin
+          git checkout master
+          git merge build --strategy-option ours  # Resolve conflicts by keeping the build branch's files
+          git push origin master  # Push the merged changes to master
+
+      - name: Delete the build branch
+        run: |
+          git push origin --delete build  # Delete the build branch remotely
