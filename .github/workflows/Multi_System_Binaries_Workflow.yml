@@ -72,19 +72,26 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           # Use Python3 from MSYS2 environment for building the wheel
+          # C:\msys64\usr\bin\bash -lc "
+          # pacman -S python
+          # export Path="/usr/bin/python3:$PATH"
+          # export CC=gcc;
+          # export CXX=g++;
+          # export LDSHARED='\$CC -shared';
+          # export AR=ar;
+          # export RANLIB=ranlib;
+          # cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');  # Navigate to the correct workspace directory
+          # export PATH=/mingw64/bin:$PATH;
+          # python3 -m pip install --upgrade pip setuptools wheel;
+          # python3 setup.py build;
+          # python3 setup.py bdist_wheel;
+          # "
           C:\msys64\usr\bin\bash -lc "
-          pacman -S python
-          export Path="/usr/bin/python3:$PATH"
-          export CC=gcc;
-          export CXX=g++;
-          export LDSHARED='\$CC -shared';
-          export AR=ar;
-          export RANLIB=ranlib;
-          cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');  # Navigate to the correct workspace directory
-          export PATH=/mingw64/bin:$PATH;
+          cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');  # Ensure the MSYS2 shell is in the correct workspace directory
+          export PATH=/mingw64/bin:$PATH;  # Add MinGW64 paths to environment
           python3 -m pip install --upgrade pip setuptools wheel;
-          python3 setup.py build;
-          python3 setup.py bdist_wheel;
+          python3 setup.py build;  # Build the project
+          python3 setup.py bdist_wheel;  # Create the wheel package
           "
 
       - name: Build wheel
