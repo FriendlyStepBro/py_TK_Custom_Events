@@ -73,7 +73,8 @@ jobs:
         run: |
           # Use Python3 from MSYS2 environment for building the wheel
           C:\msys64\usr\bin\bash -lc "
-          export PATH=/mingw64/bin:$PATH
+          cd $GITHUB_WORKSPACE;
+          export PATH=/mingw64/bin:$PATH;
           python3 -m pip install --upgrade pip setuptools wheel;
           python3 setup.py build;
           python3 setup.py bdist_wheel;
