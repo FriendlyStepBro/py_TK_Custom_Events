@@ -2,36 +2,44 @@ import platform
 from setuptools import setup, Extension
 import os
 
-# This script builds the resize_event module, which is a C extension for tkinter events.
 # Detect the platform
 if platform.system() == 'Windows':
     source_file = 'win_Resize.c'
-    # Use environment variables to get the Tcl/Tk include and lib directories
+    
+    # Use MSYS2 toolchain paths for GCC
+    os.environ['CC'] = 'C:/msys64/mingw64/bin/gcc.exe'  # Use MSYS2 GCC compiler
+    os.environ['CXX'] = 'C:/msys64/mingw64/bin/g++.exe'  # Use MSYS2 G++
+    os.environ['LD'] = 'C:/msys64/mingw64/bin/ld.exe'    # Use MSYS2 linker
+    os.environ['AR'] = 'C:/msys64/mingw64/bin/ar.exe'    # Use MSYS2 archiver
+    os.environ['RANLIB'] = 'C:/msys64/mingw64/bin/ranlib.exe'  # Use MSYS2 ranlib
+
+    # Include and library paths for Tcl/Tk
     include_dirs = [
-        os.environ.get('TCL_INCLUDE_DIR', 'C:/Program Files/Tcl/include')
+        'C:/msys64/mingw64/include'
     ]
     library_dirs = [
-        os.environ.get('TCL_LIB_DIR', 'C:/Program Files/Tcl/lib')
+        'C:/msys64/mingw64/lib'
     ]
-    libraries = ['tk', 'tcl']
+    libraries = ['tcl', 'tk']
+
 elif platform.system() == 'Darwin':  # macOS
     source_file = 'unix_Resize.c'
-    # Include both Tk and X11 headers on macOS
     include_dirs = ['/Library/Frameworks/Tk.framework/Headers', '/opt/X11/include']
     libraries = ['tcl', 'tk', 'X11']
-    library_dirs = ['/opt/X11/lib']  # Add X11 library directory
+    library_dirs = ['/opt/X11/lib']
+
 else:  # Linux and others
     source_file = 'unix_Resize.c'
     include_dirs = ['/usr/include/tcl', '/usr/include/tk', '/usr/include/X11']
     libraries = ['tcl', 'tk', 'X11']
-    library_dirs = []  # Default system paths should be enough
+    library_dirs = []
 
 module = Extension(
     'resize_event',
     sources=[source_file],
-    include_dirs=include_dirs,  # Add include directories for Tk and X11
-    libraries=libraries,        # Link with Tcl/Tk and X11 libraries
-    library_dirs=library_dirs   # Add library directories
+    include_dirs=include_dirs,
+    libraries=libraries,
+    library_dirs=library_dirs
 )
 
 setup(

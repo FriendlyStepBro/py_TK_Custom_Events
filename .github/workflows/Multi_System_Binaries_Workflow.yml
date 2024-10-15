@@ -48,12 +48,19 @@ jobs:
           choco install msys2
           
           # Update MSYS2 and install Tcl/Tk
-          C:\tools\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm"
-          C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
+          C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm"
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
 
-          # Add MSYS2 paths for compilation
-          echo "C:\tools\msys64\mingw64\bin" >> $GITHUB_PATH
-          
+          # Add MSYS2 paths for Tcl/Tk and GCC
+          echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
+          echo "C:\msys64\mingw64\include" >> $GITHUB_PATH
+          echo "C:\msys64\mingw64\lib" >> $GITHUB_PATH
+
+          # Use MSYS2 gcc and g++ compilers
+          set CC=gcc
+          set CXX=g++
+          set LD=ld
+
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Build wheel
