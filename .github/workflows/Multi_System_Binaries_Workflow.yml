@@ -89,12 +89,16 @@ jobs:
           git config --global user.email "actions@github.com"
           
           git clean -fd  # Remove untracked files (such as wheel files in 'dist/')
-          
+
           # Ensure we are on the build branch or create it
           git checkout -B build  # Switch to the build branch or create it if it doesn't exist
           
           # Rebuild the wheel file
           python setup.py bdist_wheel  # Generate the wheel files
+          
+          # Pull the latest changes from master to ensure we're up to date
+          git fetch origin master
+          git rebase origin/master  # Rebase with latest master changes
           
           # Add the new wheel files to Git
           git add dist/*
