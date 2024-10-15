@@ -59,12 +59,17 @@ jobs:
           # Use MSYS2 gcc and g++ compilers
           set CC=gcc
           set CXX=g++
-          set LD=ld
+          export LDSHARED="$CC -shared"
+          export AR=ar
+          export RANLIB=ranlib
+          python setup.py build
+          python setup.py bdist_wheel
 
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Build wheel
         run: |
+          python setup.py build
           python setup.py bdist_wheel  # Build the wheel
         shell: bash  # Use bash shell for this step
 
