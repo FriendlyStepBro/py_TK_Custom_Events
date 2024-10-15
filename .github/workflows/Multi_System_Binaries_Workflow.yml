@@ -47,25 +47,32 @@ jobs:
           # Install MSYS2
           choco install msys2
           
-          # Update MSYS2 and install Tcl/Tk
+          # Update MSYS2 and install necessary packages
           C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm"
-          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
 
-          # Add MSYS2 paths for Tcl/Tk and GCC
+      - name: Add MSYS2 Paths
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Add MSYS2 paths for Tcl/Tk and GCC to the GitHub runner's PATH
           echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
           echo "C:\msys64\mingw64\include" >> $GITHUB_PATH
           echo "C:\msys64\mingw64\lib" >> $GITHUB_PATH
 
-          # Use MSYS2 gcc and g++ compilers
-          set CC=gcc
-          set CXX=g++
-          export LDSHARED="$CC -shared"
-          export AR=ar
-          export RANLIB=ranlib
-          python setup.py build
-          python setup.py bdist_wheel
-
-          python -m pip install --upgrade pip setuptools wheel
+      - name: Build wheel in MinGW64 environment
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Run the build in the MinGW64 shell
+          C:\msys64\usr\bin\bash -lc "
+          export CC=gcc;
+          export CXX=g++;
+          export LDSHARED='\$CC -shared';
+          export AR=ar;
+          export RANLIB=ranlib;
+          python3 -m pip install --upgrade pip setuptools wheel;
+          python3 setup.py build;
+          python3 setup.py bdist_wheel;
+          "
 
       - name: Build wheel
         run: |
