@@ -22,6 +22,15 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
+      
+      - name: Cache MSYS2 (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache@v3
+        with:
+          path: C:/msys64
+          key: ${{ runner.os }}-msys2-${{ hashFiles('setup.py') }}  # You can use a different file for the hash
+          restore-keys: |
+            ${{ runner.os }}-msys2-
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,7 +39,7 @@ jobs:
           architecture: ${{ matrix.architecture }}
 
       - name: Install dependencies for Linux/Mac
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-latest' && !steps.cache-msys2.outputs.cache-hit
         run: |
           if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             sudo apt-get update
