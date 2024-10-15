@@ -94,14 +94,13 @@ jobs:
       #     # python3 setup.py bdist_wheel;  # Create the wheel package
       #     # "
 
-      - name: Build wheel in MinGW64 environment (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Build Python Package
         run: |
           # Convert the Windows GitHub workspace path to a MSYS2-compatible path
           GITHUB_WORKSPACE_MSYS="/c$(echo $GITHUB_WORKSPACE | cut -c 3- | sed 's/\\/\//g')"
-
+          
           # Run the build in the MinGW64 shell
-          C:\msys64\usr\bin\bash -lc "
+          C:/msys64/usr/bin/bash -lc "
           pacman -S --noconfirm python
           export PATH=/mingw64/bin:$PATH;
           export CC=gcc;
@@ -120,6 +119,7 @@ jobs:
           python3 setup.py build;
           python3 setup.py bdist_wheel;
           "
+        shell: msys2
 
       - name: Move Windows build artifacts to dist
         if: matrix.os == 'windows-latest'
