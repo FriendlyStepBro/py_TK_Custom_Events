@@ -97,6 +97,9 @@ jobs:
       - name: Build wheel in MinGW64 environment (Windows)
         if: matrix.os == 'windows-latest'
         run: |
+          # Convert the Windows GitHub workspace path to a MSYS2-compatible path
+          GITHUB_WORKSPACE_MSYS="/c$(echo $GITHUB_WORKSPACE | cut -c 3- | sed 's/\\/\//g')"
+
           # Run the build in the MinGW64 shell
           C:\msys64\usr\bin\bash -lc "
           pacman -S --noconfirm python
@@ -106,10 +109,10 @@ jobs:
           export LDSHARED='\$CC -shared';
           export AR=ar;
           export RANLIB=ranlib;
-          
-          # Navigate to the GitHub workspace directory
-          cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');
-          
+
+          # Navigate to the correct workspace directory in MSYS2 format
+          cd $GITHUB_WORKSPACE_MSYS;
+
           # Ensure we have the latest pip and build tools
           python3 -m pip install --upgrade pip setuptools wheel;
 
@@ -121,8 +124,8 @@ jobs:
       - name: Move Windows build artifacts to dist
         if: matrix.os == 'windows-latest'
         run: |
-          # Ensure built wheels are moved to the dist/ directory
-          mv /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')/dist/*.whl ./dist/
+          # Move the generated wheels to the dist/ directory in the GitHub workspace
+          mv $GITHUB_WORKSPACE_MSYS/dist/*.whl ./dist/
 
       - name: Build wheel
         if: matrix.os != 'windows-latest'
