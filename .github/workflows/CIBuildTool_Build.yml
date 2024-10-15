@@ -1,0 +1,40 @@
+name: Build and Save Wheels using CIBuildWheel
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches-ignore:
+  #     - build
+
+permissions:
+  contents: write
+
+jobs:
+  build_wheels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel==2.14.1
+
+      - name: Build wheels
+        env:
+          CIBW_BUILD: cp312-*  # Build only for Python 3.12
+          CIBW_SKIP: pp*  # Skip PyPy if not needed
+          CIBW_BUILD_VERBOSITY: 1
+        run: cibuildwheel --output-dir dist
+
+      - name: Commit and push the built wheels
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add dist/*.whl
+          git commit -m "Update wheel files for Python 3.12"
+          git push origin master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

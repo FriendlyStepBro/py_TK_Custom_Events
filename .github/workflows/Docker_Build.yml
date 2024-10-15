@@ -1,10 +1,10 @@
-name: Build and Save Wheels (DOCKER)
+name: Build and Save Wheels
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-      - build  # Prevent workflow from running when pushing to the build branch
+  # push:
+  #   branches-ignore:
+  #     - build  # Prevent workflow from running when pushing to the build branch
 
 permissions:
   contents: write  # Allows the workflow to push changes to the repository
@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ['3.12']
         architecture: ['x64']
 
@@ -30,47 +30,61 @@ jobs:
           architecture: ${{ matrix.architecture }}
 
       - name: Install dependencies for Linux/Mac
-        if: matrix.os != 'windows-latest'
         run: |
           if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             sudo apt-get update
             sudo apt-get install -y tk-dev tcl-dev libx11-dev
           elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
-            brew install xquartz  # Install XQuartz to get X11 libraries
-            export LIBRARY_PATH="/opt/X11/lib"  # Ensure X11 libraries are correctly linked
+            brew install tcl-tk
+            export LIBRARY_PATH="/usr/local/opt/tcl-tk/lib"
           fi
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Build with Docker for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace msys2/msys2:20230423 bash -c "
-            pacman -Syu --noconfirm;
-            pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip mingw-w64-x86_64-tcl mingw-w64-x86_64-tk;
-            python3 -m pip install --upgrade pip setuptools wheel;
-            python3 setup.py build;
-            python3 setup.py bdist_wheel;
-          "
-
       - name: Build wheel
-        if: matrix.os != 'windows-latest'
         run: |
           python setup.py build
           python setup.py bdist_wheel  # Build the wheel
         shell: bash
 
-      - name: Commit and push the built wheels
+  windows_build:
+    name: Build Windows Wheels using Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Build with Docker for Windows
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace ghcr.io/msys2/msys2:20231001 msys2/bash -lc "
+            pacman -Syu --noconfirm;
+            pacman -S --noconfirm mingw-w64-x86_64-python3 mingw-w64-x86_64-python-pip mingw-w64-x86_64-gcc mingw-w64-x86_64-tcl mingw-w64-x86_64-tk;
+            python3 -m pip install --upgrade pip setuptools wheel;
+            python3 setup.py build;
+            python3 setup.py bdist_wheel;
+          "
+
+      - name: Set permissions for output files
+        run: sudo chown -R $USER:$USER ${{ github.workspace }}
+
+  commit_and_push:
+    name: Commit and Push Wheels
+    needs: [build_wheels, windows_build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          
-          git clean -fd  # Remove untracked files (such as wheel files in 'dist/')
-          git checkout master
-          git pull origin master  # Pull the latest changes from master
-          python setup.py bdist_wheel  # Generate the wheel files
-          git add .  # Add all changes to the commit
-          git commit -a -m "Update wheel files for Python 3.12 on ${{ matrix.os }} (x64)"
-          git push --force origin master  # Force push to overwrite the existing master branch
 
+      - name: Add and Commit Wheels
+        run: |
+          git add dist/*.whl
+          git commit -m "Update wheel files for Python 3.12"
+
+      - name: Push Changes
+        run: git push origin master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
