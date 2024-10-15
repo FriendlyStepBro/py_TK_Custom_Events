@@ -22,15 +22,6 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
-      
-      # - name: Cache MSYS2 (Windows only)
-      #   if: matrix.os == 'windows-latest'
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: C:/msys64
-      #     key: ${{ runner.os }}-msys2-${{ hashFiles('setup.py') }}  # You can use a different file for the hash
-      #     restore-keys: |
-      #       ${{ runner.os }}-msys2-
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -39,7 +30,7 @@ jobs:
           architecture: ${{ matrix.architecture }}
 
       - name: Install dependencies for Linux/Mac
-        if: matrix.os != 'windows-latest' && !steps.cache-msys2.outputs.cache-hit
+        if: matrix.os != 'windows-latest'
         run: |
           if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
             sudo apt-get update
@@ -56,45 +47,15 @@ jobs:
           # Install MSYS2
           choco install msys2
           
+          # Add MSYS2 to the PATH
+          echo "C:/msys64/usr/bin" >> $GITHUB_PATH
+          echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+
           # Update MSYS2 and install necessary packages
-          C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm"
-          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
+          C:/msys64/usr/bin/bash -lc "pacman -Syu --noconfirm"
+          C:/msys64/usr/bin/bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
 
-      - name: Add MSYS2 Paths
-        if: matrix.os == 'windows-latest'
-        run: |
-          # Add MSYS2 paths for Tcl/Tk and GCC to the GitHub runner's PATH
-          echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
-          echo "C:\msys64\mingw64\include" >> $GITHUB_PATH
-          echo "C:\msys64\mingw64\lib" >> $GITHUB_PATH
-
-      # - name: Build wheel in MinGW64 environment
-      #   if: matrix.os == 'windows-latest'
-      #   run: |
-      #     # Use Python3 from MSYS2 environment for building the wheel
-      #     C:\msys64\usr\bin\bash -lc "
-      #     pacman -S python
-      #     export Path="/usr/bin/python3:$PATH"
-      #     export CC=gcc;
-      #     export CXX=g++;
-      #     export LDSHARED='\$CC -shared';
-      #     export AR=ar;
-      #     export RANLIB=ranlib;
-      #     cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');  # Navigate to the correct workspace directory
-      #     export PATH=/mingw64/bin:$PATH;
-      #     python3 -m pip install --upgrade pip setuptools wheel;
-      #     python3 setup.py build;
-      #     python3 setup.py bdist_wheel;
-      #     "
-      #     # C:\msys64\usr\bin\bash -lc "
-      #     # cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');  # Ensure the MSYS2 shell is in the correct workspace directory
-      #     # export PATH=/mingw64/bin:$PATH;  # Add MinGW64 paths to environment
-      #     # python3 -m pip install --upgrade pip setuptools wheel;
-      #     # python3 setup.py build;  # Build the project
-      #     # python3 setup.py bdist_wheel;  # Create the wheel package
-      #     # "
-
-      - name: Build Python Package
+      - name: Build Python Package in MSYS2
         if: matrix.os == 'windows-latest'
         run: |
           # Convert the Windows GitHub workspace path to a MSYS2-compatible path
@@ -102,7 +63,6 @@ jobs:
 
           # Run the build in the MinGW64 shell
           C:/msys64/usr/bin/bash -lc "
-          pacman -S --noconfirm python
           export PATH=/mingw64/bin:$PATH;
           export CC=gcc;
           export CXX=g++;
@@ -120,7 +80,6 @@ jobs:
           python3 setup.py build;
           python3 setup.py bdist_wheel;
           "
-        shell: msys2
 
       - name: Move Windows build artifacts to dist
         if: matrix.os == 'windows-latest'
@@ -133,7 +92,7 @@ jobs:
         run: |
           python setup.py build
           python setup.py bdist_wheel  # Build the wheel
-        shell: bash  # Use bash shell for this step
+        shell: bash
 
       - name: Commit and push the built wheels
         run: |
