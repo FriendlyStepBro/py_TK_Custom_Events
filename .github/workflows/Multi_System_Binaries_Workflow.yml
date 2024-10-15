@@ -73,7 +73,7 @@ jobs:
         run: |
           # Use Python3 from MSYS2 environment for building the wheel
           C:\msys64\usr\bin\bash -lc "
-          cd $GITHUB_WORKSPACE;
+          cd /c/$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g');  # Navigate to the correct workspace directory
           export PATH=/mingw64/bin:$PATH;
           python3 -m pip install --upgrade pip setuptools wheel;
           python3 setup.py build;
