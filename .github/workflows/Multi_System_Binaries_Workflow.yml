@@ -45,33 +45,24 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           # Install MSYS2
-          choco install msys2 -y
-
-          ls C:/msys64/usr/bin  # List the contents of the MSYS2 directory
-          ls C:/msys64/mingw64/bin  # List the contents of the MinGW64 directory
+          choco install msys2
           
           # Add MSYS2 to the PATH
           echo "C:/msys64/usr/bin" >> $GITHUB_PATH
           echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
-          echo "C:/msys64/usr/bin/bash -lc" >> $GITHUB_PATH
 
           # Update MSYS2 and install necessary packages
           C:/msys64/usr/bin/bash -lc "pacman -Syu --noconfirm"
           C:/msys64/usr/bin/bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
 
-      - name: Test Bash Shell
-        if: matrix.os == 'windows-latest'
-        run: |
-          C:/msys64/usr/bin/bash -lc "echo 'MSYS2 is working'"
-
       - name: Build Python Package in MSYS2
         if: matrix.os == 'windows-latest'
         run: |
-          # Convert the Windows GitHub workspace path to a MSYS2-compatible path
-          GITHUB_WORKSPACE_MSYS="/c$(echo $GITHUB_WORKSPACE | cut -c 3- | sed 's/\\/\//g')"
+          # Convert the Windows GitHub workspace path to a MSYS2-compatible path inside MSYS2 bash
+          C:/msys64/usr/bin/bash -lc "
+          GITHUB_WORKSPACE_MSYS='/c$(echo $GITHUB_WORKSPACE | cut -c 3- | sed 's/\\\\/\\//g')'
 
           # Run the build in the MinGW64 shell
-          C:/msys64/usr/bin/bash -lc "
           export PATH=/mingw64/bin:$PATH;
           export CC=gcc;
           export CXX=g++;
@@ -94,7 +85,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           # Move the generated wheels to the dist/ directory in the GitHub workspace
-          mv $GITHUB_WORKSPACE_MSYS/dist/*.whl ./dist/
+          C:/msys64/usr/bin/bash -lc "
+          GITHUB_WORKSPACE_MSYS='/c$(echo $GITHUB_WORKSPACE | cut -c 3- | sed 's/\\\\/\\//g')'
+          mv $GITHUB_WORKSPACE_MSYS/dist/*.whl ./dist/"
 
       - name: Build wheel
         if: matrix.os != 'windows-latest'
