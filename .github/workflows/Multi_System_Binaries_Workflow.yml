@@ -64,6 +64,8 @@ jobs:
         run: |
           # Run the build in the MinGW64 shell
           C:\msys64\usr\bin\bash -lc "
+          pacman -S python
+          export Path="/usr/bin/python3:$PATH"
           export CC=gcc;
           export CXX=g++;
           export LDSHARED='\$CC -shared';
