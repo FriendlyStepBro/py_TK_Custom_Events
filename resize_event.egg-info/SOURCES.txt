@@ -1,0 +1,6 @@
+setup.py
+unix_Resize.c
+resize_event.egg-info/PKG-INFO
+resize_event.egg-info/SOURCES.txt
+resize_event.egg-info/dependency_links.txt
+resize_event.egg-info/top_level.txt
