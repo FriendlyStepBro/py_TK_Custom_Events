@@ -45,15 +45,24 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           # Install MSYS2
-          choco install msys2
+          choco install msys2 -y
+
+          ls C:/msys64/usr/bin  # List the contents of the MSYS2 directory
+          ls C:/msys64/mingw64/bin  # List the contents of the MinGW64 directory
           
           # Add MSYS2 to the PATH
           echo "C:/msys64/usr/bin" >> $GITHUB_PATH
           echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+          echo "C:/msys64/usr/bin/bash -lc" >> $GITHUB_PATH
 
           # Update MSYS2 and install necessary packages
           C:/msys64/usr/bin/bash -lc "pacman -Syu --noconfirm"
           C:/msys64/usr/bin/bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip mingw-w64-x86_64-tcl mingw-w64-x86_64-tk"
+
+      - name: Test Bash Shell
+        if: matrix.os == 'windows-latest'
+        run: |
+          C:/msys64/usr/bin/bash -lc "echo 'MSYS2 is working'"
 
       - name: Build Python Package in MSYS2
         if: matrix.os == 'windows-latest'
