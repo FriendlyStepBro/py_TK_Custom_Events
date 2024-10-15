@@ -1,4 +1,4 @@
-name: Build and Save Wheels
+name: Build and Save Wheels (DIRECT DOWNLOAD)
 
 on:
   workflow_dispatch:
@@ -58,11 +58,11 @@ jobs:
       - name: Build Python Package in MSYS2
         if: matrix.os == 'windows-latest'
         run: |
-          # Convert the Windows GitHub workspace path to a MSYS2-compatible path inside MSYS2 bash
-          C:/msys64/usr/bin/bash -lc "
-          GITHUB_WORKSPACE_MSYS='/c$(echo $GITHUB_WORKSPACE | cut -c 3- | sed 's/\\\\/\\//g')'
+          # Use a simpler method to convert the workspace path to MSYS2-compatible format
+          GITHUB_WORKSPACE_MSYS="/c$(echo $GITHUB_WORKSPACE | cut -c 3-)"
 
           # Run the build in the MinGW64 shell
+          C:/msys64/usr/bin/bash -lc "
           export PATH=/mingw64/bin:$PATH;
           export CC=gcc;
           export CXX=g++;
