@@ -77,6 +77,7 @@ jobs:
           "
 
       - name: Build wheel
+        if: matrix.os != 'windows-latest'
         run: |
           python setup.py build
           python setup.py bdist_wheel  # Build the wheel
